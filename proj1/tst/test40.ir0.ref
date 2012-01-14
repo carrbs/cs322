@@ -1,0 +1,11 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME a) (CALL (NAME malloc) ( (NAME A_obj_size)))]
+ [CALLST (NAME setk) ( (CONST 5))]
+ [CALLST (NAME print) ( (NAME j))]
+ [CALLST (NAME print) ( (NAME k))]
+ [CALLST (NAME print) ( (NAME l))]
+}
+setk (locals=0, max_args=0) {
+ [MOVE (NAME k) (NAME i)]
+}

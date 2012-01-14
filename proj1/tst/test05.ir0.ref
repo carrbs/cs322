@@ -1,0 +1,8 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME b) (CALL (NAME malloc) ( (NAME Body_obj_size)))]
+ [CALLST (NAME go) ()]
+}
+go (locals=0, max_args=0) {
+ [CALLST (NAME print) ( (STRING "Go!"))]
+}

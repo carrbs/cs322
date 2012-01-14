@@ -1,0 +1,15 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME i) (CONST 2)]
+ [MOVE (NAME j) (CONST 3)]
+ [MOVE (NAME k) (BINOP + (NAME i) (NAME j))]
+ [CALLST (NAME print) ( (NAME k))]
+ [CJUMP == (ESEQ
+ [MOVE (TEMP 1) (CONST 1)]
+ [CJUMP == (NAME k) (CONST 5) (NAME L1)]
+ [MOVE (TEMP 1) (CONST 0)]
+ [LABEL L1]
+ (TEMP 1)) (CONST 0) (NAME L0)]
+ [CALLST (NAME print) ( (STRING "OK"))]
+ [LABEL L0]
+}

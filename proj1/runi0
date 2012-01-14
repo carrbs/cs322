@@ -1,0 +1,11 @@
+#!/bin/sh
+for i
+do
+	d=`dirname $i`
+	f=`basename $i .ast`
+	echo $d/$f:
+	java irgen0/TestIrgen0 $d/$f.ast 1> $d/$f.ir0
+	if [ -r $d/$f.ir0.ref ]; then diff -w $d/$f.ir0 $d/$f.ir0.ref; fi
+done
+exit 0
+
