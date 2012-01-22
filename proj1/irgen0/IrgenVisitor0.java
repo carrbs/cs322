@@ -1,8 +1,10 @@
 // cs322
+// Benjamin Carr
 // proj1
 
 package irgen0;
 import ir.*;
+import ast.*;
 public class IrgenVisitor0 implements TransVI {
     private NAME cWordSize; // a symbolic name
 
@@ -33,10 +35,10 @@ public class IrgenVisitor0 implements TransVI {
     public FUNC visit(MethodDecl n) throws Exception { 
         String label = n.mid.s;
         STMTlist stmts = n.sl.accept(this);
-        STMTlist formals = n.fl.accept(this);
+        //STMTlist formals = n.fl.accept(this);
         STMTlist vars = n.vl.accept(this);
-        stmts.addAll(formals);
-        stmts.addAll(vars);
+        //stmts.addAll(formals);
+        //stmts.addAll(vars);
         return new FUNC(label, 0, 0, stmts);
     }
     public STMTlist visit(VarDeclList n) throws Exception { 
@@ -71,7 +73,7 @@ public class IrgenVisitor0 implements TransVI {
         return new MOVE(lhs, rhs);
     }
     public STMT visit(CallStmt n) throws Exception {
-        Name label = n.mid.s;
+        NAME label = new NAME(n.mid.s);
         EXPlist args = n.args.accept(this);
         return new CALLST(label, args);
     }
@@ -90,12 +92,12 @@ public class IrgenVisitor0 implements TransVI {
         if_node.add(f_label);
         STMT s2 = n.s2.accept(this);
         if_node.add(s2);
-        LABEL d_label = new LABEL(d_name)
+        LABEL d_label = new LABEL(d_name);
         if_node.add(d_label);
         return if_node;
     }
     public STMT visit(While n) throws Exception { 
-        STMTlist = while_node = new STMTlist();
+        STMTlist while_node = new STMTlist();
         NAME start_name = new NAME();
         LABEL start_label = new LABEL(start_name);
         while_node.add(start_label);
@@ -113,16 +115,17 @@ public class IrgenVisitor0 implements TransVI {
     }
     public STMT visit(Print n) throws Exception {
         EXPlist print_expr = new EXPlist();
-        print_expr.add(n.e.accept(this));
-        return new CALLST(new NAME("print"), print_expr)
+        if (n.e != null)
+            print_expr.add(n.e.accept(this));
+        return new CALLST(new NAME("print"), print_expr);
     }
     public STMT visit(Return n) throws Exception { 
-        return new RETURN(n.e);
+        return new RETURN(n.e.accept(this));
     }
 
     // Expressions
     public EXPlist visit(ExpList n) throws Exception { 
-        EXPlist exprs = new EXPlist()
+        EXPlist exprs = new EXPlist();
         for (int i = 0; i < n.size(); i++)
             exprs.add(n.elementAt(i).accept(this));
         return exprs;
@@ -136,9 +139,9 @@ public class IrgenVisitor0 implements TransVI {
             MOVE set_false = new MOVE(result, new CONST(0));
             and_node.add(set_false);
             NAME end_name = new NAME();
-            CJUMP cj1 = new CJUMP(0, e1, CONST(0), end_name); 
+            CJUMP cj1 = new CJUMP(0, e1, new CONST(0), end_name); 
             and_node.add(cj1);
-            CJUMP cj2 = new CJUMP(0, e2, CONST(0), end_name); 
+            CJUMP cj2 = new CJUMP(0, e2, new CONST(0), end_name); 
             and_node.add(cj2);
             MOVE set_true = new MOVE(result, new CONST(1));
             and_node.add(set_true);
@@ -152,9 +155,9 @@ public class IrgenVisitor0 implements TransVI {
             MOVE set_true = new MOVE(result, new CONST(1));
             or_node.add(set_true);
             NAME true_name = new NAME();
-            CJUMP cj1 = new CJUMP(0, e1, CONST(1), true_name);
+            CJUMP cj1 = new CJUMP(0, e1, new CONST(1), true_name);
             or_node.add(cj1);
-            CJUMP cj2 = new CJUMP(0, e2, CONST(1), true_name);
+            CJUMP cj2 = new CJUMP(0, e2, new CONST(1), true_name);
             or_node.add(cj2);
             MOVE set_false = new MOVE(result, new CONST(0));
             or_node.add(set_false);
@@ -165,20 +168,74 @@ public class IrgenVisitor0 implements TransVI {
         else
             return new BINOP(n.op,e1,e2);
     }
-    public EXP visit(Relop n) throws Exception { }
-    public EXP visit(Unop n) throws Exception { }
-    public EXP visit(ArrayElm n) throws Exception { }
-    public EXP visit(ArrayLen n) throws Exception { }
-    public EXP visit(Field n) throws Exception { }
-    public EXP visit(Call n) throws Exception { }
-    public EXP visit(NewArray n) throws Exception { }
-    public EXP visit(NewObj n) throws Exception { }
-    public EXP visit(Id n) throws Exception { }
-    public EXP visit(This n) { }
+    public EXP visit(Relop n) throws Exception { 
+        EXP e1 = n.e1.accept(this);
+        EXP e2 = n.e2.accept(this);
+        STMTlist relop_node = new STMTlist();
+        TEMP result = new TEMP();
+        MOVE set_true = new MOVE(result, new CONST(1));
+        relop_node.add(set_true);
+        NAME true_name = new NAME();
+        CJUMP cj1 = new CJUMP(n.op, e1, e2, true_name);
+        relop_node.add(true_name);
+        MOVE set_false = new MOVE(result, new CONST(0));
+        relop_node.add(set_false);
+        relop_node.add(new LABEL(true_name));
+        return new ESEQ(relop_node, result);
+    }
+    public EXP visit(Unop n) throws Exception {
+        return new BINOP(BINOP.SUB, new CONST(1), n.e.accept(this));
+    }
+    public EXP visit(ArrayElm n) throws Exception {
+        Id array_id = (Id) n.array;
+        IntVal index = (IntVal) n.idx;
+        BINOP add_one = new BINOP(BINOP.ADD, new CONST(index.i), new CONST(1));
+        NAME array_name = new NAME(array_id.s);
+        return new MEM(new BINOP(BINOP.ADD,array_name, 
+                                 (new BINOP(BINOP.MUL, add_one, cWordSize))));
+    }
+    public EXP visit(ArrayLen n) throws Exception {
+        Id array_id = (Id) n.array;
+        NAME array_name = new NAME(array_id.s);
+        return new MEM(BINOP.ADD, array_name, new CONST(0));
+    }
+    public EXP visit(Field n) throws Exception {
+        return new NAME(n.var.s);
+    }
+    public EXP visit(Call n) throws Exception {
+        return new CALL(new NAME(n.mid.s),n.args.accept(this));
+    }
+    public EXP visit(NewArray n) throws Exception {
+        STMTlist array_list = new STMTlist();
+        TEMP malloc_loc = new TEMP();
+        NAME malloc = new NAME("malloc");
+        BINOP array_size = new BINOP(BINOP.MUL,new CONST(n.size+1), cWordSize);
+        CALL malloc_call = new CALL(malloc, array_size);
+        MOVE malloc_init = new MOVE(malloc_loc,malloc_call);
+        array_list.add(malloc_init);
+        MOVE array_size_set = new MOVE(new MEM(malloc_loc), new CONST(n.size));
+        array_list.add(array_size_set);
+        TEMP iterator = new TEMP();
+        BINOP array_end = new BINOP(BINOP.MUL, new CONST(n.size), cWordSize);
+        BINOP array_end_set = new BINOP(BINOP.ADD,malloc_loc,array_end);
+        array_list.add(new MOVE(iterator,array_end_set));
+        NAME label_name = new NAME();
+        array_list.add(new LABEL(label_name));
+        MOVE move1 = new MOVE(MEM(iterator), new CONST(0));
+        array_list.add(move1);
+        BINOP next = new BINOP(BINOP.SUB,iterator,cWordSize);
+        MOVE move2 = new MOVE(iterator, next);
+        array_list.add(move2);
+        CJUMP cj = new CJUMP(CJUMP.GT, iterator, malloc_loc,label_name);
+        return new ESEQ(array_list,malloc_loc);
+    }
+    public EXP visit(NewObj n) throws Exception { return null; }
+    public EXP visit(Id n) throws Exception { return null; }
+    public EXP visit(This n) { return null; }
 
     // Base values
-    public EXP visit(IntVal n) { }
-    public EXP visit(FloatVal n) { }
-    public EXP visit(BoolVal n) { }
-    public EXP visit(StrVal n) { }
+    public EXP visit(IntVal n) { return new CONST(n.i); }
+    public EXP visit(FloatVal n) { return new FLOAT(n.f); }
+    public EXP visit(BoolVal n) { return new CONST(n.b ? 1 : 0); }
+    public EXP visit(StrVal n) { return new STRING(n.s); }
 }
