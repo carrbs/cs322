@@ -34,17 +34,18 @@ public class IrgenVisitor0 implements TransVI {
     }
     public FUNC visit(MethodDecl n) throws Exception { 
         String label = n.mid.s;
-        STMTlist stmts = n.sl.accept(this);
-        //STMTlist formals = n.fl.accept(this);
         STMTlist vars = n.vl.accept(this);
-        //stmts.addAll(formals);
-        //stmts.addAll(vars);
-        return new FUNC(label, 0, 0, stmts);
+        STMTlist stmts = n.sl.accept(this);
+        vars.add(stmts);
+        return new FUNC(label, 0, 0, vars);
     }
     public STMTlist visit(VarDeclList n) throws Exception { 
         STMTlist stmts = new STMTlist();
-        for (int i = 0; i < n.size(); i++)
-            stmts.add(n.elementAt(i).accept(this));
+        for (int i = 0; i < n.size(); i++) {
+            STMT s = n.elementAt(i).accept(this);
+            if (s != null)
+                stmts.add(s);
+        }
         return stmts;
     }
     public STMT visit(VarDecl n) throws Exception { 
@@ -79,21 +80,25 @@ public class IrgenVisitor0 implements TransVI {
     }
     public STMT visit(If n) throws Exception { 
         STMTlist if_node = new STMTlist();
-        EXP e = n.e.accept(this);
         NAME f_name = new NAME();
+        EXP e = n.e.accept(this);
         CJUMP cj = new CJUMP(0, e, new CONST(0), f_name);
         if_node.add(cj);
         STMT s1 = n.s1.accept(this);
         if_node.add(s1);
-        NAME d_name = new NAME();
-        JUMP j = new JUMP(d_name);
-        if_node.add(j);
-        LABEL f_label = new LABEL(f_name);
-        if_node.add(f_label);
-        STMT s2 = n.s2.accept(this);
-        if_node.add(s2);
-        LABEL d_label = new LABEL(d_name);
-        if_node.add(d_label);
+        if (n.s2 == null)
+            if_node.add(new LABEL(f_name));
+        else {
+            NAME d_name = new NAME();
+            JUMP j = new JUMP(d_name);
+            if_node.add(j);
+            LABEL f_label = new LABEL(f_name);
+            if_node.add(f_label);
+            STMT s2 = n.s2.accept(this);
+            if_node.add(s2);
+            LABEL d_label = new LABEL(d_name);
+            if_node.add(d_label);
+        }
         return if_node;
     }
     public STMT visit(While n) throws Exception { 
@@ -101,8 +106,8 @@ public class IrgenVisitor0 implements TransVI {
         NAME start_name = new NAME();
         LABEL start_label = new LABEL(start_name);
         while_node.add(start_label);
-        EXP e = n.e.accept(this);
         NAME end_name = new NAME();
+        EXP e = n.e.accept(this);
         CJUMP cj = new CJUMP(0, e, new CONST(0), end_name);
         while_node.add(cj);
         STMT s = n.s.accept(this);
@@ -133,6 +138,7 @@ public class IrgenVisitor0 implements TransVI {
     public EXP visit(Binop n) throws Exception {
         EXP e1 = n.e1.accept(this);
         EXP e2 = n.e2.accept(this);
+        /*
         if (n.op == Binop.AND) {
             STMTlist and_node = new STMTlist();
             TEMP result = new TEMP();
@@ -166,7 +172,8 @@ public class IrgenVisitor0 implements TransVI {
             return new ESEQ(or_node, result);
         }
         else
-            return new BINOP(n.op,e1,e2);
+        */
+        return new BINOP(n.op,e1,e2);
     }
     public EXP visit(Relop n) throws Exception { 
         EXP e1 = n.e1.accept(this);
@@ -177,7 +184,7 @@ public class IrgenVisitor0 implements TransVI {
         relop_node.add(set_true);
         NAME true_name = new NAME();
         CJUMP cj1 = new CJUMP(n.op, e1, e2, true_name);
-        relop_node.add(true_name);
+        relop_node.add(cj1);
         MOVE set_false = new MOVE(result, new CONST(0));
         relop_node.add(set_false);
         relop_node.add(new LABEL(true_name));
@@ -188,8 +195,8 @@ public class IrgenVisitor0 implements TransVI {
     }
     public EXP visit(ArrayElm n) throws Exception {
         Id array_id = (Id) n.array;
-        IntVal index = (IntVal) n.idx;
-        BINOP add_one = new BINOP(BINOP.ADD, new CONST(index.i), new CONST(1));
+        EXP index = n.idx.accept(this);
+        BINOP add_one = new BINOP(BINOP.ADD, index, new CONST(1));
         NAME array_name = new NAME(array_id.s);
         return new MEM(new BINOP(BINOP.ADD,array_name, 
                                  (new BINOP(BINOP.MUL, add_one, cWordSize))));
@@ -197,7 +204,7 @@ public class IrgenVisitor0 implements TransVI {
     public EXP visit(ArrayLen n) throws Exception {
         Id array_id = (Id) n.array;
         NAME array_name = new NAME(array_id.s);
-        return new MEM(BINOP.ADD, array_name, new CONST(0));
+        return new MEM(array_name);
     }
     public EXP visit(Field n) throws Exception {
         return new NAME(n.var.s);
@@ -210,7 +217,8 @@ public class IrgenVisitor0 implements TransVI {
         TEMP malloc_loc = new TEMP();
         NAME malloc = new NAME("malloc");
         BINOP array_size = new BINOP(BINOP.MUL,new CONST(n.size+1), cWordSize);
-        CALL malloc_call = new CALL(malloc, array_size);
+        EXPlist malloc_list = new EXPlist(array_size);
+        CALL malloc_call = new CALL(malloc, malloc_list);
         MOVE malloc_init = new MOVE(malloc_loc,malloc_call);
         array_list.add(malloc_init);
         MOVE array_size_set = new MOVE(new MEM(malloc_loc), new CONST(n.size));
@@ -221,17 +229,26 @@ public class IrgenVisitor0 implements TransVI {
         array_list.add(new MOVE(iterator,array_end_set));
         NAME label_name = new NAME();
         array_list.add(new LABEL(label_name));
-        MOVE move1 = new MOVE(MEM(iterator), new CONST(0));
+        MOVE move1 = new MOVE(new MEM(iterator), new CONST(0));
         array_list.add(move1);
         BINOP next = new BINOP(BINOP.SUB,iterator,cWordSize);
         MOVE move2 = new MOVE(iterator, next);
         array_list.add(move2);
         CJUMP cj = new CJUMP(CJUMP.GT, iterator, malloc_loc,label_name);
+        array_list.add(cj);
         return new ESEQ(array_list,malloc_loc);
     }
-    public EXP visit(NewObj n) throws Exception { return null; }
-    public EXP visit(Id n) throws Exception { return null; }
-    public EXP visit(This n) { return null; }
+    public EXP visit(NewObj n) throws Exception {
+        EXPlist obj_list = new EXPlist();
+        obj_list.add(new NAME(n.cid.s+"_obj_size"));
+        return new CALL(new NAME("malloc"), obj_list);
+    }
+    public EXP visit(Id n) throws Exception {  
+        return new NAME(n.s);
+    }
+    public EXP visit(This n) {
+        return new NAME("this");
+    }
 
     // Base values
     public EXP visit(IntVal n) { return new CONST(n.i); }
