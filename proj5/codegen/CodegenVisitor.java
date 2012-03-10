@@ -32,7 +32,10 @@ public class CodegenVisitor implements CodeVI {
         Sparc.emit0("save %sp,-" + framesize + ",%sp");
         f.stmts.accept(this);
         Sparc.freeAllRegs();
-        //TODO: ...
+        Sparc.emit0("ret");
+        Sparc.emit0("restore");
+        Sparc.emitNonInst("\n");
+
     }
     public void visit(FUNClist fl) throws Exception {
         for (int i=0; i<fl.size(); i++)
@@ -153,7 +156,11 @@ public class CodegenVisitor implements CodeVI {
             Sparc.freeReg(Sparc.regO0);
         }
     }
-    public void visit(RETURN t) throws Exception { }
+    public void visit(RETURN t) throws Exception {
+        Sparc.emit0("ret");
+        Sparc.emit0("restore");
+        Sparc.emitNonInst("\n");
+    }
     public Operand visit(EXPlist t) throws Exception {return null;}
     public Operand visit(ESEQ t) throws Exception { return null;}
     public Operand visit(MEM t) throws Exception { return null;}

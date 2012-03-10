@@ -25,9 +25,12 @@ main:
 	or %o0, %lo(L$1),%o0
 	call printf
 	nop
+	ret
+	restore
+
 L$1:	.asciz "%d\n"
 L$2:	.asciz "123\n"
 L$3:	.asciz "\n"
 
 !Total regs:  2
-!Total insts: 25
+!Total insts: 27
