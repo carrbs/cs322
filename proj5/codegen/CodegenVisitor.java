@@ -123,16 +123,26 @@ public class CodegenVisitor implements CodeVI {
             Sparc.getReg(Sparc.regO0);
             Sparc.emit0("sethi %hi(" + lab + "),%o0");
             Sparc.emit0("or %o0, %lo(" + lab + "),%o0");
-                        Sparc.emit0("call printf");
+            Sparc.emit0("call printf");
             Sparc.emit0("nop");
             Sparc.freeReg(Sparc.regO0);
-        } /*else if (...) { TODO:
+        } else if (args != null && args.size() == 1
+                && (args.elementAt(0) instanceof CONST)) {
+            int num = ((CONST) args.elementAt(0)).val;
+            Immed m = new Immed(num);
+            Sparc.getReg(Sparc.regO0);
+            Sparc.getReg(Sparc.regO1);
+            Sparc.emit2("mov",m,Sparc.regO1);
+            Sparc.emit0("sethi %hi(L$1),%o0");
+            Sparc.emit0("or %o0, %lo(L$1),%o0");
+            Sparc.emit0("call printf");
+            Sparc.emit0("nop");
+            Sparc.freeReg(Sparc.regO1);
+            Sparc.freeReg(Sparc.regO0);
             // print an integer: pass two arguments to printf, 
             // one control string
             // at L$1 and one integer
-        ...
-        } else { ...
-        } */
+        } else {} 
     }
     public void visit(RETURN t) throws Exception { }
     public Operand visit(EXPlist t) throws Exception {return null;}
