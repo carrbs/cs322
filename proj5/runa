@@ -1,0 +1,12 @@
+#!/bin/sh
+for i
+do
+	d=`dirname $i`
+	f=`basename $i .s`
+	echo $d/$f:
+	gcc $d/$f.s; a.out > $d/$f.out
+	if [ -r $d/$f.out.ref ]; then diff -w $d/$f.out $d/$f.out.ref;
+	else cat $d/$f.out; fi
+done
+exit 0
+

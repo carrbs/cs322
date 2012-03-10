@@ -1,0 +1,55 @@
+	.align 4
+A_A:
+!locals=0, max_args=0
+	save %sp,-96,%sp
+! [RETURN (PARAM 1)]
+	ld [%fp+72],%i0
+	ret
+	restore
+	ret
+	restore
+
+	.global main
+	.align 4
+main:
+!locals=2, max_args=2
+	save %sp,-104,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (NAME wSZ)))]
+	mov 4,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 0)]
+	mov 0,%l1
+	st %l1,[%l0]
+! [MOVE (VAR 2) (TEMP 1)]
+	st %l0,[%fp-8]
+! [MOVE (TEMP 2) (CALL (NAME A_A) ( (VAR 2) (CONST 1)))]
+	ld [%fp-8],%l1
+	st %l1,[%sp+68]
+	mov 1,%l1
+	st %l1,[%sp+72]
+	call A_A
+	nop
+!>> Temp t2 assigned to reg %l1
+	mov %o0,%l1
+! [MOVE (FIELD (VAR 2) 0) (TEMP 2)]
+	ld [%fp-8],%l2
+	st %l1,[%l2]
+! [MOVE (VAR 1) (FIELD (VAR 2) 0)]
+	ld [%fp-8],%l2
+	ld [%l2],%l3
+	st %l3,[%fp-4]
+! [CALLST (NAME print) ( (VAR 1))]
+	ld [%fp-4],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  4
+!Total insts: 38

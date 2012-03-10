@@ -1,0 +1,77 @@
+	.global main
+	.align 4
+main:
+!locals=1, max_args=2
+	save %sp,-96,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (BINOP * (CONST 4) (NAME wSZ))))]
+	mov 4,%l0
+	smul %l0,4,%l0
+	mov %l0,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 2)]
+	mov 2,%l1
+	st %l1,[%l0]
+! [MOVE (MEM (BINOP + (TEMP 1) (NAME wSZ))) (FIELD (TEMP 1) 0)]
+	ld [%l0],%l1
+	add %l0,4,%l2
+	st %l1,[%l2]
+! [MOVE (MEM (BINOP + (TEMP 1) (BINOP * (CONST 2) (NAME wSZ)))) (CONST 3)]
+	mov 3,%l1
+	mov 2,%l2
+	smul %l2,4,%l2
+	add %l0,%l2,%l3
+	st %l1,[%l3]
+! [MOVE (MEM (BINOP + (TEMP 1) (BINOP * (CONST 3) (NAME wSZ)))) (FIELD (TEMP 1) 2)]
+	ld [%l0+8],%l1
+	mov 3,%l2
+	smul %l2,4,%l2
+	add %l0,%l2,%l3
+	st %l1,[%l3]
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [CALLST (NAME A_setk) ( (VAR 1) (CONST 5))]
+	ld [%fp-4],%l1
+	st %l1,[%sp+68]
+	mov 5,%l1
+	st %l1,[%sp+72]
+	call A_setk
+	nop
+! [CALLST (NAME print) ( (FIELD (VAR 1) 1))]
+	ld [%fp-4],%l1
+	ld [%l1+4],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (FIELD (VAR 1) 2))]
+	ld [%fp-4],%l1
+	ld [%l1+8],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (FIELD (VAR 1) 3))]
+	ld [%fp-4],%l1
+	ld [%l1+12],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+	.align 4
+A_setk:
+!locals=0, max_args=0
+	save %sp,-96,%sp
+! [MOVE (FIELD (PARAM 0) 2) (PARAM 1)]
+	ld [%fp+72],%l0
+	ld [%fp+68],%l1
+	st %l0,[%l1+8]
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  4
+!Total insts: 58

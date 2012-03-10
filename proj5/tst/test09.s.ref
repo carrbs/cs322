@@ -1,0 +1,80 @@
+	.global main
+	.align 4
+main:
+!locals=1, max_args=1
+	save %sp,-96,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (NAME wSZ)))]
+	mov 4,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 3) (CALL (NAME Body_go) ( (VAR 1)))]
+	ld [%fp-4],%l1
+	st %l1,[%sp+68]
+	call Body_go
+	nop
+!>> Temp t3 assigned to reg %l1
+	mov %o0,%l1
+! [CALLST (NAME print) ( (TEMP 3))]
+	mov %l1,%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+	.align 4
+Body_go:
+!locals=1, max_args=4
+	save %sp,-96,%sp
+! [MOVE (TEMP 2) (CALL (NAME malloc) ( (NAME wSZ)))]
+	mov 4,%o0
+	call malloc
+	nop
+!>> Temp t2 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (VAR 1) (TEMP 2)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 4) (CALL (NAME Body2_value) ( (VAR 1) (CONST 1) (CONST 2) (CONST 3)))]
+	ld [%fp-4],%l1
+	st %l1,[%sp+68]
+	mov 1,%l1
+	st %l1,[%sp+72]
+	mov 2,%l1
+	st %l1,[%sp+76]
+	mov 3,%l1
+	st %l1,[%sp+80]
+	call Body2_value
+	nop
+!>> Temp t4 assigned to reg %l1
+	mov %o0,%l1
+! [RETURN (TEMP 4)]
+	mov %l1,%i0
+	ret
+	restore
+	ret
+	restore
+
+	.align 4
+Body2_value:
+!locals=0, max_args=0
+	save %sp,-96,%sp
+! [RETURN (BINOP + (BINOP + (PARAM 1) (PARAM 2)) (PARAM 3))]
+	ld [%fp+72],%l0
+	ld [%fp+76],%l1
+	add %l0,%l1,%l0
+	ld [%fp+80],%l1
+	add %l0,%l1,%l0
+	mov %l0,%i0
+	ret
+	restore
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  4
+!Total insts: 58

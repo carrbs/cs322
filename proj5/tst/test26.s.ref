@@ -1,0 +1,82 @@
+	.align 4
+test_foo:
+!locals=0, max_args=1
+	save %sp,-96,%sp
+! [CJUMP <= (PARAM 1) (CONST 1) (NAME L0)]
+	ld [%fp+72],%l0
+	cmp %l0,1
+	ble L0
+	nop
+! [MOVE (TEMP 1) (CALL (NAME test_bar) ( (PARAM 0)))]
+	ld [%fp+68],%l0
+	st %l0,[%sp+68]
+	call test_bar
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [RETURN (TEMP 1)]
+	mov %l0,%i0
+	ret
+	restore
+! [JUMP (NAME L1)]
+	ba L1
+	nop
+! [LABEL L0]
+L0:
+! [RETURN (CONST 3)]
+	mov 3,%i0
+	ret
+	restore
+! [LABEL L1]
+L1:
+	ret
+	restore
+
+	.align 4
+test_bar:
+!locals=0, max_args=2
+	save %sp,-96,%sp
+! [MOVE (TEMP 2) (CALL (NAME test_foo) ( (PARAM 0) (CONST 1)))]
+	ld [%fp+68],%l0
+	st %l0,[%sp+68]
+	mov 1,%l0
+	st %l0,[%sp+72]
+	call test_foo
+	nop
+!>> Temp t2 assigned to reg %l0
+	mov %o0,%l0
+! [RETURN (TEMP 2)]
+	mov %l0,%i0
+	ret
+	restore
+	ret
+	restore
+
+	.global main
+	.align 4
+main:
+!locals=1, max_args=2
+	save %sp,-96,%sp
+! [MOVE (TEMP 3) (CALL (NAME test_foo) ( (PARAM 0) (CONST 2)))]
+	ld [%fp+68],%l0
+	st %l0,[%sp+68]
+	mov 2,%l0
+	st %l0,[%sp+72]
+	call test_foo
+	nop
+!>> Temp t3 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (VAR 1) (TEMP 3)]
+	st %l0,[%fp-4]
+! [CALLST (NAME print) ( (VAR 1))]
+	ld [%fp-4],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  3
+!Total insts: 58

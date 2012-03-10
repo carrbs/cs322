@@ -1,0 +1,58 @@
+	.global main
+	.align 4
+main:
+!locals=2, max_args=0
+	save %sp,-104,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (NAME wSZ)))]
+	mov 4,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 1)]
+	mov 1,%l1
+	st %l1,[%l0]
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 2) (CALL (NAME malloc) ( (BINOP * (CONST 2) (NAME wSZ))))]
+	mov 2,%l1
+	smul %l1,4,%l1
+	mov %l1,%o0
+	call malloc
+	nop
+!>> Temp t2 assigned to reg %l1
+	mov %o0,%l1
+! [MOVE (MEM (TEMP 2)) (CONST 1)]
+	mov 1,%l2
+	st %l2,[%l1]
+! [MOVE (MEM (BINOP + (TEMP 2) (NAME wSZ))) (CONST 2)]
+	mov 2,%l2
+	add %l1,4,%l3
+	st %l2,[%l3]
+! [MOVE (VAR 2) (TEMP 2)]
+	st %l1,[%fp-8]
+! [CALLST (NAME print) ( (FIELD (VAR 1) 0))]
+	ld [%fp-4],%l2
+	ld [%l2],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (FIELD (VAR 2) 0))]
+	ld [%fp-8],%l2
+	ld [%l2],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (FIELD (VAR 2) 1))]
+	ld [%fp-8],%l2
+	ld [%l2+4],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  4
+!Total insts: 41

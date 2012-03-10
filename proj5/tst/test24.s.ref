@@ -1,0 +1,85 @@
+	.align 4
+A_foo:
+!locals=1, max_args=0
+	save %sp,-96,%sp
+! [RETURN (BINOP + (PARAM 1) (CONST 1))]
+	ld [%fp+72],%l0
+	add %l0,1,%l0
+	mov %l0,%i0
+	ret
+	restore
+	ret
+	restore
+
+	.align 4
+test_foo:
+!locals=1, max_args=0
+	save %sp,-96,%sp
+! [RETURN (PARAM 1)]
+	ld [%fp+72],%i0
+	ret
+	restore
+	ret
+	restore
+
+	.global main
+	.align 4
+main:
+!locals=3, max_args=2
+	save %sp,-104,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (BINOP * (CONST 2) (NAME wSZ))))]
+	mov 2,%l0
+	smul %l0,4,%l0
+	mov %l0,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 0)]
+	mov 0,%l1
+	st %l1,[%l0]
+! [MOVE (MEM (BINOP + (TEMP 1) (NAME wSZ))) (CONST 0)]
+	mov 0,%l1
+	add %l0,4,%l2
+	st %l1,[%l2]
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 2) (CALL (NAME test_foo) ( (PARAM 0) (CONST 1)))]
+	ld [%fp+68],%l1
+	st %l1,[%sp+68]
+	mov 1,%l1
+	st %l1,[%sp+72]
+	call test_foo
+	nop
+!>> Temp t2 assigned to reg %l1
+	mov %o0,%l1
+! [MOVE (VAR 2) (TEMP 2)]
+	st %l1,[%fp-8]
+! [MOVE (TEMP 3) (CALL (NAME A_foo) ( (VAR 1) (CONST 1)))]
+	ld [%fp-4],%l2
+	st %l2,[%sp+68]
+	mov 1,%l2
+	st %l2,[%sp+72]
+	call A_foo
+	nop
+!>> Temp t3 assigned to reg %l2
+	mov %o0,%l2
+! [MOVE (VAR 3) (TEMP 3)]
+	st %l2,[%fp-12]
+! [CALLST (NAME print) ( (VAR 2))]
+	ld [%fp-8],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (VAR 3))]
+	ld [%fp-12],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  5
+!Total insts: 61

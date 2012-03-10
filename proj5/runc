@@ -1,0 +1,11 @@
+#!/bin/sh
+for i
+do
+	d=`dirname $i`
+	f=`basename $i .ir`
+	echo $d/$f:
+	java codegen/TestCodegen $d/$f.ir 1> $d/$f.s
+	if [ -r $d/$f.s.ref ]; then diff $d/$f.s $d/$f.s.ref; fi
+done
+exit 0
+

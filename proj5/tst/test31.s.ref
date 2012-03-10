@@ -1,0 +1,122 @@
+	.align 4
+A_f:
+!locals=0, max_args=0
+	save %sp,-96,%sp
+! [RETURN (BINOP - (PARAM 1) (CONST 1))]
+	ld [%fp+72],%l0
+	sub %l0,1,%l0
+	mov %l0,%i0
+	ret
+	restore
+	ret
+	restore
+
+	.align 4
+A_g:
+!locals=0, max_args=2
+	save %sp,-96,%sp
+! [MOVE (TEMP 3) (CALL (NAME A_f) ( (PARAM 0) (PARAM 1)))]
+	ld [%fp+68],%l0
+	st %l0,[%sp+68]
+	ld [%fp+72],%l0
+	st %l0,[%sp+72]
+	call A_f
+	nop
+!>> Temp t3 assigned to reg %l0
+	mov %o0,%l0
+! [RETURN (TEMP 3)]
+	mov %l0,%i0
+	ret
+	restore
+	ret
+	restore
+
+	.align 4
+B_f:
+!locals=0, max_args=0
+	save %sp,-96,%sp
+! [RETURN (PARAM 1)]
+	ld [%fp+72],%i0
+	ret
+	restore
+	ret
+	restore
+
+	.global main
+	.align 4
+main:
+!locals=4, max_args=2
+	save %sp,-112,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (BINOP * (CONST 2) (NAME wSZ))))]
+	mov 2,%l0
+	smul %l0,4,%l0
+	mov %l0,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 1)]
+	mov 1,%l1
+	st %l1,[%l0]
+! [MOVE (MEM (BINOP + (TEMP 1) (NAME wSZ))) (CONST 2)]
+	mov 2,%l1
+	add %l0,4,%l2
+	st %l1,[%l2]
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 2) (CALL (NAME malloc) ( (BINOP * (CONST 2) (NAME wSZ))))]
+	mov 2,%l1
+	smul %l1,4,%l1
+	mov %l1,%o0
+	call malloc
+	nop
+!>> Temp t2 assigned to reg %l1
+	mov %o0,%l1
+! [MOVE (MEM (TEMP 2)) (CONST 1)]
+	mov 1,%l2
+	st %l2,[%l1]
+! [MOVE (MEM (BINOP + (TEMP 2) (NAME wSZ))) (CONST 2)]
+	mov 2,%l2
+	add %l1,4,%l3
+	st %l2,[%l3]
+! [MOVE (VAR 2) (TEMP 2)]
+	st %l1,[%fp-8]
+! [MOVE (TEMP 4) (CALL (NAME A_g) ( (VAR 1) (CONST 2)))]
+	ld [%fp-4],%l2
+	st %l2,[%sp+68]
+	mov 2,%l2
+	st %l2,[%sp+72]
+	call A_g
+	nop
+!>> Temp t4 assigned to reg %l2
+	mov %o0,%l2
+! [MOVE (VAR 3) (TEMP 4)]
+	st %l2,[%fp-12]
+! [MOVE (TEMP 5) (CALL (NAME A_g) ( (VAR 2) (CONST 2)))]
+	ld [%fp-8],%l3
+	st %l3,[%sp+68]
+	mov 2,%l3
+	st %l3,[%sp+72]
+	call A_g
+	nop
+!>> Temp t5 assigned to reg %l3
+	mov %o0,%l3
+! [MOVE (VAR 4) (TEMP 5)]
+	st %l3,[%fp-16]
+! [CALLST (NAME print) ( (VAR 3))]
+	ld [%fp-12],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (VAR 4))]
+	ld [%fp-16],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  6
+!Total insts: 88

@@ -1,0 +1,149 @@
+	.global main
+	.align 4
+main:
+!locals=1, max_args=1
+	save %sp,-96,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (BINOP * (CONST 2) (NAME wSZ))))]
+	mov 2,%l0
+	smul %l0,4,%l0
+	mov %l0,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 0)]
+	mov 0,%l1
+	st %l1,[%l0]
+! [MOVE (MEM (BINOP + (TEMP 1) (NAME wSZ))) (CONST 0)]
+	mov 0,%l1
+	add %l0,4,%l2
+	st %l1,[%l2]
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 7) (CALL (NAME A_go) ( (VAR 1)))]
+	ld [%fp-4],%l1
+	st %l1,[%sp+68]
+	call A_go
+	nop
+!>> Temp t7 assigned to reg %l1
+	mov %o0,%l1
+! [CALLST (NAME print) ( (TEMP 7))]
+	mov %l1,%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+	.align 4
+A_go:
+!locals=1, max_args=0
+	save %sp,-96,%sp
+! [MOVE (TEMP 2) (CALL (NAME malloc) ( (BINOP * (CONST 5) (NAME wSZ))))]
+	mov 5,%l0
+	smul %l0,4,%l0
+	mov %l0,%o0
+	call malloc
+	nop
+!>> Temp t2 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 2)) (CONST 4)]
+	mov 4,%l1
+	st %l1,[%l0]
+! [MOVE (TEMP 3) (BINOP + (TEMP 2) (BINOP * (CONST 4) (NAME wSZ)))]
+	mov 4,%l1
+	smul %l1,4,%l1
+	add %l0,%l1,%l2
+!>> Temp t3 assigned to reg %l1
+	mov %l2,%l1
+! [LABEL L0]
+L0:
+! [MOVE (MEM (TEMP 3)) (CONST 0)]
+	mov 0,%l2
+	st %l2,[%l1]
+! [MOVE (TEMP 3) (BINOP - (TEMP 3) (NAME wSZ))]
+	sub %l1,4,%l2
+	mov %l2,%l1
+! [CJUMP > (TEMP 3) (TEMP 2) (NAME L0)]
+	cmp %l1,%l0
+	bg L0
+	nop
+! [MOVE (VAR 1) (TEMP 2)]
+	st %l0,[%fp-4]
+! [MOVE (TEMP 4) (CONST 1)]
+!>> Temp t4 assigned to reg %l2
+	mov 1,%l2
+! [CJUMP < (CONST 1) (CONST 2) (NAME L1)]
+	mov 1,%l3
+	cmp %l3,2
+	bl L1
+	nop
+! [MOVE (TEMP 4) (CONST 0)]
+	mov 0,%l2
+! [LABEL L1]
+L1:
+! [MOVE (TEMP 5) (CONST 1)]
+!>> Temp t5 assigned to reg %l3
+	mov 1,%l3
+! [CJUMP > (CONST 3) (CONST 4) (NAME L2)]
+	mov 3,%l4
+	cmp %l4,4
+	bg L2
+	nop
+! [MOVE (TEMP 5) (CONST 0)]
+	mov 0,%l3
+! [LABEL L2]
+L2:
+! [MOVE (TEMP 6) (CONST 1)]
+!>> Temp t6 assigned to reg %l4
+	mov 1,%l4
+! [CJUMP == (CONST 5) (BINOP + (CONST 6) (BINOP * (CONST 7) (CONST 8))) (NAME L3)]
+	mov 5,%l5
+	mov 6,%l6
+	mov 7,%l7
+	smul %l7,8,%l7
+	add %l6,%l7,%l6
+	cmp %l5,%l6
+	be L3
+	nop
+! [MOVE (TEMP 6) (CONST 0)]
+	mov 0,%l4
+! [LABEL L3]
+L3:
+! [MOVE (FIELD (PARAM 0) 0) (BINOP || (BINOP || (TEMP 4) (BINOP && (TEMP 5) (TEMP 6))) (CONST 0))]
+	and %l3,%l4,%l5
+	or %l2,%l5,%l6
+	or %l6,0,%l6
+	ld [%fp+68],%l5
+	st %l6,[%l5]
+! [MOVE (FIELD (PARAM 0) 1) (BINOP + (BINOP + (BINOP - (CONST 8) (CONST 7)) (CONST 6)) (BINOP / (BINOP * (CONST 5) (MEM (VAR 1))) (CONST 2)))]
+	mov 8,%l5
+	sub %l5,7,%l5
+	add %l5,6,%l5
+	mov 5,%l6
+	ld [%fp-4],%l7
+	ld [%l7],%l7
+	smul %l6,%l7,%l6
+	wr %g0,%g0,%y
+	sdiv %l6,2,%l6
+	add %l5,%l6,%l5
+	ld [%fp+68],%l6
+	st %l5,[%l6+4]
+! [CALLST (NAME print) ( (FIELD (PARAM 0) 0))]
+	ld [%fp+68],%l5
+	ld [%l5],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [RETURN (FIELD (PARAM 0) 1)]
+	ld [%fp+68],%l5
+	ld [%l5+4],%i0
+	ret
+	restore
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  8
+!Total insts: 105

@@ -1,0 +1,268 @@
+	.global main
+	.align 4
+main:
+!locals=2, max_args=3
+	save %sp,-104,%sp
+! [MOVE (TEMP 1) (CALL (NAME malloc) ( (BINOP * (CONST 11) (NAME wSZ))))]
+	mov 11,%l0
+	smul %l0,4,%l0
+	mov %l0,%o0
+	call malloc
+	nop
+!>> Temp t1 assigned to reg %l0
+	mov %o0,%l0
+! [MOVE (MEM (TEMP 1)) (CONST 10)]
+	mov 10,%l1
+	st %l1,[%l0]
+! [MOVE (TEMP 2) (BINOP + (TEMP 1) (BINOP * (CONST 10) (NAME wSZ)))]
+	mov 10,%l1
+	smul %l1,4,%l1
+	add %l0,%l1,%l2
+!>> Temp t2 assigned to reg %l1
+	mov %l2,%l1
+! [LABEL L0]
+L0:
+! [MOVE (MEM (TEMP 2)) (CONST 0)]
+	mov 0,%l2
+	st %l2,[%l1]
+! [MOVE (TEMP 2) (BINOP - (TEMP 2) (NAME wSZ))]
+	sub %l1,4,%l2
+	mov %l2,%l1
+! [CJUMP > (TEMP 2) (TEMP 1) (NAME L0)]
+	cmp %l1,%l0
+	bg L0
+	nop
+! [MOVE (VAR 1) (TEMP 1)]
+	st %l0,[%fp-4]
+! [MOVE (VAR 2) (CONST 0)]
+	mov 0,%l2
+	st %l2,[%fp-8]
+! [LABEL L1]
+L1:
+! [MOVE (TEMP 3) (CONST 1)]
+!>> Temp t3 assigned to reg %l2
+	mov 1,%l2
+! [CJUMP < (VAR 2) (CONST 10) (NAME L3)]
+	ld [%fp-8],%l3
+	cmp %l3,10
+	bl L3
+	nop
+! [MOVE (TEMP 3) (CONST 0)]
+	mov 0,%l2
+! [LABEL L3]
+L3:
+! [CJUMP == (TEMP 3) (CONST 0) (NAME L2)]
+	cmp %l2,0
+	be L2
+	nop
+! [MOVE (MEM (BINOP + (VAR 1) (BINOP * (BINOP + (VAR 2) (CONST 1)) (NAME wSZ)))) (BINOP - (CONST 10) (VAR 2))]
+	mov 10,%l3
+	ld [%fp-8],%l4
+	sub %l3,%l4,%l3
+	ld [%fp-4],%l4
+	ld [%fp-8],%l5
+	add %l5,1,%l5
+	smul %l5,4,%l5
+	add %l4,%l5,%l4
+	st %l3,[%l4]
+! [MOVE (VAR 2) (BINOP + (VAR 2) (CONST 1))]
+	ld [%fp-8],%l3
+	add %l3,1,%l3
+	st %l3,[%fp-8]
+! [JUMP (NAME L1)]
+	ba L1
+	nop
+! [LABEL L2]
+L2:
+! [CALLST (NAME prog_selectionSort) ( (PARAM 0) (VAR 1) (VAR 2))]
+	ld [%fp+68],%l3
+	st %l3,[%sp+68]
+	ld [%fp-4],%l3
+	st %l3,[%sp+72]
+	ld [%fp-8],%l3
+	st %l3,[%sp+76]
+	call prog_selectionSort
+	nop
+! [CALLST (NAME print) ( (STRING "Your numbers in sorted order are:"))]
+	sethi %hi(L$2),%o0
+	call printf
+	or %o0, %lo(L$2),%o0
+! [MOVE (VAR 2) (CONST 0)]
+	mov 0,%l3
+	st %l3,[%fp-8]
+! [LABEL L4]
+L4:
+! [MOVE (TEMP 4) (CONST 1)]
+!>> Temp t4 assigned to reg %l3
+	mov 1,%l3
+! [CJUMP < (VAR 2) (CONST 10) (NAME L6)]
+	ld [%fp-8],%l4
+	cmp %l4,10
+	bl L6
+	nop
+! [MOVE (TEMP 4) (CONST 0)]
+	mov 0,%l3
+! [LABEL L6]
+L6:
+! [CJUMP == (TEMP 4) (CONST 0) (NAME L5)]
+	cmp %l3,0
+	be L5
+	nop
+! [CALLST (NAME print) ( (MEM (BINOP + (VAR 1) (BINOP * (BINOP + (VAR 2) (CONST 1)) (NAME wSZ)))))]
+	ld [%fp-4],%l4
+	ld [%fp-8],%l5
+	add %l5,1,%l5
+	smul %l5,4,%l5
+	add %l4,%l5,%l4
+	ld [%l4],%l4
+	mov %l4,%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [MOVE (VAR 2) (BINOP + (VAR 2) (CONST 1))]
+	ld [%fp-8],%l4
+	add %l4,1,%l4
+	st %l4,[%fp-8]
+! [JUMP (NAME L4)]
+	ba L4
+	nop
+! [LABEL L5]
+L5:
+	ret
+	restore
+
+	.align 4
+prog_selectionSort:
+!locals=4, max_args=0
+	save %sp,-112,%sp
+! [MOVE (VAR 2) (BINOP - (PARAM 2) (CONST 1))]
+	ld [%fp+76],%l0
+	sub %l0,1,%l0
+	st %l0,[%fp-8]
+! [LABEL L7]
+L7:
+! [MOVE (TEMP 5) (CONST 1)]
+!>> Temp t5 assigned to reg %l0
+	mov 1,%l0
+! [CJUMP >= (VAR 2) (CONST 0) (NAME L9)]
+	ld [%fp-8],%l1
+	cmp %l1,0
+	bge L9
+	nop
+! [MOVE (TEMP 5) (CONST 0)]
+	mov 0,%l0
+! [LABEL L9]
+L9:
+! [CJUMP == (TEMP 5) (CONST 0) (NAME L8)]
+	cmp %l0,0
+	be L8
+	nop
+! [MOVE (VAR 3) (CONST 0)]
+	mov 0,%l1
+	st %l1,[%fp-12]
+! [MOVE (VAR 4) (CONST 0)]
+	mov 0,%l1
+	st %l1,[%fp-16]
+! [LABEL L10]
+L10:
+! [MOVE (TEMP 6) (CONST 1)]
+!>> Temp t6 assigned to reg %l1
+	mov 1,%l1
+! [CJUMP <= (VAR 3) (VAR 2) (NAME L12)]
+	ld [%fp-12],%l2
+	ld [%fp-8],%l3
+	cmp %l2,%l3
+	ble L12
+	nop
+! [MOVE (TEMP 6) (CONST 0)]
+	mov 0,%l1
+! [LABEL L12]
+L12:
+! [CJUMP == (TEMP 6) (CONST 0) (NAME L11)]
+	cmp %l1,0
+	be L11
+	nop
+! [CJUMP <= (MEM (BINOP + (PARAM 1) (BINOP * (BINOP + (VAR 3) (CONST 1)) (NAME wSZ)))) (MEM (BINOP + (PARAM 1) (BINOP * (BINOP + (VAR 4) (CONST 1)) (NAME wSZ)))) (NAME L13)]
+	ld [%fp+72],%l2
+	ld [%fp-12],%l3
+	add %l3,1,%l3
+	smul %l3,4,%l3
+	add %l2,%l3,%l2
+	ld [%l2],%l2
+	ld [%fp+72],%l3
+	ld [%fp-16],%l4
+	add %l4,1,%l4
+	smul %l4,4,%l4
+	add %l3,%l4,%l3
+	ld [%l3],%l3
+	cmp %l2,%l3
+	ble L13
+	nop
+! [MOVE (VAR 4) (VAR 3)]
+	ld [%fp-12],%l2
+	st %l2,[%fp-16]
+! [LABEL L13]
+L13:
+! [MOVE (VAR 3) (BINOP + (VAR 3) (CONST 1))]
+	ld [%fp-12],%l2
+	add %l2,1,%l2
+	st %l2,[%fp-12]
+! [JUMP (NAME L10)]
+	ba L10
+	nop
+! [LABEL L11]
+L11:
+! [CJUMP == (VAR 4) (VAR 2) (NAME L14)]
+	ld [%fp-16],%l2
+	ld [%fp-8],%l3
+	cmp %l2,%l3
+	be L14
+	nop
+! [MOVE (VAR 1) (MEM (BINOP + (PARAM 1) (BINOP * (BINOP + (VAR 4) (CONST 1)) (NAME wSZ))))]
+	ld [%fp+72],%l2
+	ld [%fp-16],%l3
+	add %l3,1,%l3
+	smul %l3,4,%l3
+	add %l2,%l3,%l2
+	ld [%l2],%l2
+	st %l2,[%fp-4]
+! [MOVE (MEM (BINOP + (PARAM 1) (BINOP * (BINOP + (VAR 4) (CONST 1)) (NAME wSZ)))) (MEM (BINOP + (PARAM 1) (BINOP * (BINOP + (VAR 2) (CONST 1)) (NAME wSZ))))]
+	ld [%fp+72],%l2
+	ld [%fp-8],%l3
+	add %l3,1,%l3
+	smul %l3,4,%l3
+	add %l2,%l3,%l2
+	ld [%l2],%l2
+	ld [%fp+72],%l3
+	ld [%fp-16],%l4
+	add %l4,1,%l4
+	smul %l4,4,%l4
+	add %l3,%l4,%l3
+	st %l2,[%l3]
+! [MOVE (MEM (BINOP + (PARAM 1) (BINOP * (BINOP + (VAR 2) (CONST 1)) (NAME wSZ)))) (VAR 1)]
+	ld [%fp-4],%l2
+	ld [%fp+72],%l3
+	ld [%fp-8],%l4
+	add %l4,1,%l4
+	smul %l4,4,%l4
+	add %l3,%l4,%l3
+	st %l2,[%l3]
+! [LABEL L14]
+L14:
+! [MOVE (VAR 2) (BINOP - (VAR 2) (CONST 1))]
+	ld [%fp-8],%l2
+	sub %l2,1,%l2
+	st %l2,[%fp-8]
+! [JUMP (NAME L7)]
+	ba L7
+	nop
+! [LABEL L8]
+L8:
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+L$2:	.asciz "Your numbers in sorted order are:\n"
+
+!Total regs:  7
+!Total insts: 194

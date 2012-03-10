@@ -1,0 +1,23 @@
+	.global main
+	.align 4
+main:
+!locals=1, max_args=0
+	save %sp,-96,%sp
+! [MOVE (VAR 1) (BINOP + (FLOAT 1.2) (BINOP * (FLOAT 2.5) (CONST 4)))]
+	mov 1,%l0
+	mov 2,%l1
+	smul %l1,4,%l1
+	add %l0,%l1,%l0
+	st %l0,[%fp-4]
+! [CALLST (NAME print) ( (VAR 1))]
+	ld [%fp-4],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  2
+!Total insts: 16

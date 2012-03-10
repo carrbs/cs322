@@ -1,0 +1,60 @@
+	.global main
+	.align 4
+main:
+!locals=2, max_args=0
+	save %sp,-104,%sp
+! [MOVE (TEMP 1) (CONST 1)]
+!>> Temp t1 assigned to reg %l0
+	mov 1,%l0
+! [CJUMP > (CONST 1) (CONST 2) (NAME L0)]
+	mov 1,%l1
+	cmp %l1,2
+	bg L0
+	nop
+! [MOVE (TEMP 1) (CONST 0)]
+	mov 0,%l0
+! [LABEL L0]
+L0:
+! [MOVE (TEMP 2) (CONST 1)]
+!>> Temp t2 assigned to reg %l1
+	mov 1,%l1
+! [CJUMP < (CONST 3) (CONST 4) (NAME L1)]
+	mov 3,%l2
+	cmp %l2,4
+	bl L1
+	nop
+! [MOVE (TEMP 2) (CONST 0)]
+	mov 0,%l1
+! [LABEL L1]
+L1:
+! [MOVE (VAR 1) (BINOP || (TEMP 1) (BINOP && (TEMP 2) (CONST 1)))]
+	and %l1,1,%l2
+	or %l0,%l2,%l3
+	st %l3,[%fp-4]
+! [MOVE (VAR 2) (BINOP - (BINOP + (CONST 2) (BINOP * (CONST 2) (CONST 4))) (BINOP / (CONST 9) (CONST 3)))]
+	mov 2,%l2
+	mov 2,%l3
+	smul %l3,4,%l3
+	add %l2,%l3,%l2
+	mov 9,%l3
+	wr %g0,%g0,%y
+	sdiv %l3,3,%l3
+	sub %l2,%l3,%l2
+	st %l2,[%fp-8]
+! [CALLST (NAME print) ( (VAR 1))]
+	ld [%fp-4],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+! [CALLST (NAME print) ( (VAR 2))]
+	ld [%fp-8],%o1
+	sethi %hi(L$1),%o0
+	call printf
+	or %o0, %lo(L$1),%o0
+	ret
+	restore
+
+L$1:	.asciz "%d\n"
+
+!Total regs:  4
+!Total insts: 41
