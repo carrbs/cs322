@@ -15,6 +15,8 @@ main:
 	call printf
 	nop
 ! [CALLST (NAME print) ()]
+	sethi %hi(L$3),%o0
+	or %o0, %lo(L$3),%o0
 	call printf
 	nop
 ! [CALLST (NAME print) ( (CONST 1))]
@@ -25,6 +27,7 @@ main:
 	nop
 L$1:	.asciz "%d\n"
 L$2:	.asciz "123\n"
+L$3:	.asciz "\n"
 
 !Total regs:  2
-!Total insts: 22
+!Total insts: 25
