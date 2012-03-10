@@ -17,7 +17,8 @@ public class CodegenVisitor implements CodeVI {
     }
     public void visit(PROG p) throws Exception {
         p.funcs.accept(this);
-        //printStrConsts();
+        for (int i = 1; i < strCnt; i++)
+            Sparc.emitString(strBuf[i]);
         Sparc.printStats();
     }
     public void visit(FUNC f) throws Exception {
@@ -48,7 +49,8 @@ public class CodegenVisitor implements CodeVI {
     public void visit(MOVE s) throws Exception {
         // generate code for s.src and bring result to a reg r ...
         Operand src = s.src.accept(this);
-        Reg r = null;
+        Reg r = Sparc.getReg();
+        toReg(src, r);
         if (s.dst instanceof TEMP) {
             Operand dst = s.dst.accept(this); 
             Sparc.emit2("mov", src, dst);
@@ -59,6 +61,17 @@ public class CodegenVisitor implements CodeVI {
             // TODO:...
         } else { // TODO:...
         }
+        Sparc.freeReg(r);
+    }
+
+    void toReg(Operand t, Reg r) throws Exception {
+        if (t instanceof Immed) { 
+            if (((Immed) t).is13b)
+                Sparc.emit2("mov", t, r); else
+            Sparc.emit2("set", t, r);
+        } else if (t instanceof RegOff) {
+            Sparc.emitLoad(t, r);
+    }else { /* t instanceof Reg*/}
     }
     public void visit(JUMP s) throws Exception {
         if (s.target instanceof NAME) {
@@ -134,7 +147,9 @@ public class CodegenVisitor implements CodeVI {
     public Operand visit(VAR t) throws Exception {return null; }
     public Operand visit(CONST t) throws Exception { return null;}
     public Operand visit(FLOAT t) throws Exception { return null;}
-    public Operand visit(STRING t) throws Exception { return null;}
+    public Operand visit(STRING t) throws Exception {
+        return null;
+    }
 }
 
 
