@@ -1,0 +1,17 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME b) (BINOP || (ESEQ
+ [MOVE (TEMP 1) (CONST 1)]
+ [CJUMP > (CONST 1) (CONST 2) (NAME L0)]
+ [MOVE (TEMP 1) (CONST 0)]
+ [LABEL L0]
+ (TEMP 1)) (BINOP && (ESEQ
+ [MOVE (TEMP 2) (CONST 1)]
+ [CJUMP < (CONST 3) (CONST 4) (NAME L1)]
+ [MOVE (TEMP 2) (CONST 0)]
+ [LABEL L1]
+ (TEMP 2)) (BINOP - (CONST 1) (CONST 0))))]
+ [MOVE (NAME i) (BINOP - (BINOP + (CONST 2) (BINOP * (CONST 2) (CONST 4))) (BINOP / (CONST 9) (CONST 3)))]
+ [CALLST (NAME print) ( (NAME b))]
+ [CALLST (NAME print) ( (NAME i))]
+}

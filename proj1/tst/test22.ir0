@@ -1,0 +1,14 @@
+IR_PROGRAM
+foo (locals=0, max_args=0) {
+ [RETURN (NAME i)]
+}
+bar (locals=0, max_args=0) {
+ [MOVE (NAME x) (CONST 2)]
+ [RETURN (NAME x)]
+}
+main (locals=0, max_args=0) {
+ [MOVE (NAME i) (CALL (NAME foo) ( (CONST 1)))]
+ [MOVE (NAME j) (CALL (NAME bar) ( (CONST 1)))]
+ [CALLST (NAME print) ( (NAME i))]
+ [CALLST (NAME print) ( (NAME j))]
+}

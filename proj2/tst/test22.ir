@@ -1,0 +1,16 @@
+IR_PROGRAM
+test_foo (locals=1, max_args=0) {
+ [RETURN (PARAM 1)]
+}
+test_bar (locals=1, max_args=0) {
+ [MOVE (VAR 1) (CONST 2)]
+ [RETURN (VAR 1)]
+}
+main (locals=2, max_args=2) {
+ [MOVE (TEMP 1) (CALL (NAME test_foo) ( (PARAM 0) (CONST 1)))]
+ [MOVE (VAR 1) (TEMP 1)]
+ [MOVE (TEMP 2) (CALL (NAME test_bar) ( (PARAM 0) (CONST 1)))]
+ [MOVE (VAR 2) (TEMP 2)]
+ [CALLST (NAME print) ( (VAR 1))]
+ [CALLST (NAME print) ( (VAR 2))]
+}

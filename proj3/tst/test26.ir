@@ -1,0 +1,19 @@
+IR_PROGRAM
+test_foo (locals=0, max_args=1) {
+ [CJUMP <= (PARAM 1) (CONST 1) (NAME L0)]
+ [MOVE (TEMP 1) (CALL (NAME test_bar) ( (PARAM 0)))]
+ [RETURN (TEMP 1)]
+ [JUMP (NAME L1)]
+ [LABEL L0]
+ [RETURN (CONST 3)]
+ [LABEL L1]
+}
+test_bar (locals=0, max_args=2) {
+ [MOVE (TEMP 2) (CALL (NAME test_foo) ( (PARAM 0) (CONST 1)))]
+ [RETURN (TEMP 2)]
+}
+main (locals=1, max_args=2) {
+ [MOVE (TEMP 3) (CALL (NAME test_foo) ( (PARAM 0) (CONST 2)))]
+ [MOVE (VAR 1) (TEMP 3)]
+ [CALLST (NAME print) ( (VAR 1))]
+}

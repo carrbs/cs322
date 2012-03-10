@@ -1,0 +1,9 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME x) (CALL (NAME malloc) ( (NAME A_obj_size)))]
+ [CALLST (NAME print) ( (CALL (NAME getfval) ( (CONST 5))))]
+}
+getfval (locals=0, max_args=0) {
+ [MOVE (NAME x) (FLOAT 3.1)]
+ [RETURN (BINOP * (NAME x) (NAME i))]
+}

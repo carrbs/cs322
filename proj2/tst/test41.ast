@@ -1,0 +1,7 @@
+(Program (ClassDeclList
+ (ClassDecl (Id test) (NullExp) 
+ (VarDeclList ) 
+ (MethodDeclList
+ (MethodDecl (NullType) (Id main) (FormalList ) (VarDeclList (VarDecl (BasicType float) (Id x) (NullExp) ) ) (StmtList 
+ (Assign (Id x) (Binop + (FloatVal 1.2) (Binop * (FloatVal 2.5) (IntVal 4) ) ) ) 
+ (Print (Id x) ) ) ) ) ) ) )

@@ -1,0 +1,5 @@
+IR_PROGRAM
+main (locals=1, max_args=0) {
+ [MOVE (VAR 1) (BINOP + (FLOAT 1.2) (BINOP * (FLOAT 2.5) (CONST 4)))]
+ [CALLST (NAME print) ( (VAR 1))]
+}

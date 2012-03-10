@@ -1,0 +1,10 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME b) (CALL (NAME malloc) ( (NAME Body_obj_size)))]
+ [CALLST (NAME print) ( (CALL (NAME go) ()))]
+}
+go (locals=0, max_args=0) {
+ [MOVE (NAME i) (CONST 4)]
+ [MOVE (NAME j) (BINOP + (NAME i) (CONST 2))]
+ [RETURN (NAME j)]
+}

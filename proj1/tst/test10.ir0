@@ -1,0 +1,20 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME b) (CALL (NAME malloc) ( (NAME Body_obj_size)))]
+ [CALLST (NAME print) ( (CALL (NAME go) ()))]
+}
+go (locals=0, max_args=0) {
+ [MOVE (NAME b) (CALL (NAME malloc) ( (NAME Body2_obj_size)))]
+ [RETURN (CALL (NAME value) ( (CONST 1)))]
+}
+value (locals=0, max_args=0) {
+ [MOVE (NAME i) (CONST 5)]
+ [MOVE (NAME j) (CONST 6)]
+ [CJUMP == (NAME cond) (CONST 0) (NAME L0)]
+ [MOVE (NAME k) (NAME i)]
+ [JUMP (NAME L1)]
+ [LABEL L0]
+ [MOVE (NAME k) (NAME j)]
+ [LABEL L1]
+ [RETURN (NAME k)]
+}

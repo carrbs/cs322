@@ -1,0 +1,11 @@
+IR_PROGRAM
+body_foo (locals=0, max_args=0) {
+ [RETURN (BINOP + (PARAM 1) (PARAM 2))]
+}
+main (locals=2, max_args=3) {
+ [MOVE (TEMP 1) (CALL (NAME malloc) ( (NAME wSZ)))]
+ [MOVE (VAR 1) (TEMP 1)]
+ [MOVE (TEMP 2) (CALL (NAME body_foo) ( (VAR 1) (CONST 1) (CONST 2)))]
+ [MOVE (VAR 2) (TEMP 2)]
+ [CALLST (NAME print) ( (VAR 2))]
+}

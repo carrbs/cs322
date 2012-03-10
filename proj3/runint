@@ -1,0 +1,11 @@
+#!/bin/sh
+for i
+do
+	d=`dirname $i`
+	f=`basename $i .ir`
+	echo $d/$f:
+	java interp/TestInterp $d/$f.ir 1> $d/$f.out
+	if [ -r $d/$f.out.ref ]; then diff $d/$f.out $d/$f.out.ref; fi
+done
+exit 0
+

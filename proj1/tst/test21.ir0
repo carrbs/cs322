@@ -1,0 +1,12 @@
+IR_PROGRAM
+foo (locals=0, max_args=0) {
+ [RETURN (BINOP + (NAME i) (NAME j))]
+}
+main (locals=0, max_args=0) {
+ [MOVE (NAME b) (CONST 1)]
+ [MOVE (NAME i) (CALL (NAME foo) ( (CONST 1) (CONST 2)))]
+ [MOVE (NAME j) (BINOP * (CONST 2) (CONST 3))]
+ [CALLST (NAME print) ( (NAME b))]
+ [CALLST (NAME print) ( (NAME i))]
+ [CALLST (NAME print) ( (NAME j))]
+}

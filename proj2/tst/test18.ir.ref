@@ -1,0 +1,33 @@
+IR_PROGRAM
+main (locals=1, max_args=1) {
+ [MOVE (TEMP 1) (CALL (NAME malloc) ( (NAME wSZ)))]
+ [MOVE (MEM (TEMP 1)) (CONST 0)]
+ [MOVE (VAR 1) (TEMP 1)]
+ [MOVE (TEMP 6) (CALL (NAME A_go) ( (VAR 1)))]
+ [CALLST (NAME print) ( (TEMP 6))]
+}
+A_go (locals=1, max_args=0) {
+ [MOVE (TEMP 2) (CALL (NAME malloc) ( (BINOP * (CONST 3) (NAME wSZ))))]
+ [MOVE (MEM (TEMP 2)) (CONST 2)]
+ [MOVE (TEMP 3) (BINOP + (TEMP 2) (BINOP * (CONST 2) (NAME wSZ)))]
+ [LABEL L0]
+ [MOVE (MEM (TEMP 3)) (CONST 0)]
+ [MOVE (TEMP 3) (BINOP - (TEMP 3) (NAME wSZ))]
+ [CJUMP > (TEMP 3) (TEMP 2) (NAME L0)]
+ [MOVE (FIELD (PARAM 0) 0) (TEMP 2)]
+ [MOVE (TEMP 4) (CALL (NAME malloc) ( (BINOP * (CONST 3) (NAME wSZ))))]
+ [MOVE (MEM (TEMP 4)) (CONST 2)]
+ [MOVE (TEMP 5) (BINOP + (TEMP 4) (BINOP * (CONST 2) (NAME wSZ)))]
+ [LABEL L1]
+ [MOVE (MEM (TEMP 5)) (CONST 0)]
+ [MOVE (TEMP 5) (BINOP - (TEMP 5) (NAME wSZ))]
+ [CJUMP > (TEMP 5) (TEMP 4) (NAME L1)]
+ [MOVE (VAR 1) (TEMP 4)]
+ [MOVE (MEM (BINOP + (FIELD (PARAM 0) 0) (NAME wSZ))) (CONST 1)]
+ [MOVE (MEM (BINOP + (FIELD (PARAM 0) 0) (BINOP * (CONST 2) (NAME wSZ)))) (CONST 2)]
+ [MOVE (MEM (BINOP + (VAR 1) (NAME wSZ))) (CONST 3)]
+ [MOVE (MEM (BINOP + (VAR 1) (BINOP * (CONST 2) (NAME wSZ)))) (CONST 4)]
+ [CALLST (NAME print) ( (MEM (BINOP + (FIELD (PARAM 0) 0) (BINOP * (CONST 2) (NAME wSZ)))))]
+ [CALLST (NAME print) ( (MEM (BINOP + (VAR 1) (BINOP * (CONST 2) (NAME wSZ)))))]
+ [RETURN (MEM (BINOP + (FIELD (PARAM 0) 0) (NAME wSZ)))]
+}

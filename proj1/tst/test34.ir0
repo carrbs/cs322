@@ -1,0 +1,17 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME a) (ESEQ
+ [MOVE (TEMP 1) (CALL (NAME malloc) ( (BINOP * (CONST 3) (NAME wSZ))))]
+ [MOVE (MEM (TEMP 1)) (CONST 2)]
+ [MOVE (TEMP 2) (BINOP + (TEMP 1) (BINOP * (CONST 2) (NAME wSZ)))]
+ [LABEL L0]
+ [MOVE (MEM (TEMP 2)) (CONST 0)]
+ [MOVE (TEMP 2) (BINOP - (TEMP 2) (NAME wSZ))]
+ [CJUMP > (TEMP 2) (TEMP 1) (NAME L0)]
+ (TEMP 1))]
+ [MOVE (MEM (BINOP + (NAME a) (BINOP * (BINOP + (CONST 0) (CONST 1)) (NAME wSZ)))) (CONST 2)]
+ [MOVE (MEM (BINOP + (NAME a) (BINOP * (BINOP + (CONST 1) (CONST 1)) (NAME wSZ)))) (CONST 4)]
+ [MOVE (NAME i) (CONST 0)]
+ [MOVE (NAME b) (BINOP + (MEM (BINOP + (NAME a) (BINOP * (BINOP + (NAME i) (CONST 1)) (NAME wSZ)))) (MEM (BINOP + (NAME a) (BINOP * (BINOP + (BINOP + (NAME i) (CONST 1)) (CONST 1)) (NAME wSZ)))))]
+ [CALLST (NAME print) ( (NAME b))]
+}

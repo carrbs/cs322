@@ -1,0 +1,35 @@
+    .section    ".text"
+    .align 4
+    .global scan
+scan:
+    save    %sp, -112, %sp  ! allocate the frame
+    cmp %i1, 0      ! if (n <= 0)
+    ble .LL1        !   goto .LL1
+    mov 0, %o0      ! set return value to 0 (delayed branch execution)
+    call    malloc, 0   ! call mallac
+    add %i1, 1, %o0 ! add 1 to n
+    mov 0, %o2
+    cmp %o2, %i1
+    mov 0, %o3
+    bge .LL9
+    mov 0, %o4
+.LL12:
+    sll %o4, 2, %o5
+    ld  [%i0+%o5], %g1
+    add %o4, 1, %o4
+    cmp %g1, %o2
+    ble .LL6
+    add %o3, %g1, %o3
+    mov %g1, %o2
+.LL6:
+    cmp %o4, %i1
+    bl  .LL12
+    st  %o3, [%o0+%o5]
+.LL9:
+    sll %i1, 2, %g1
+    st  %o2, [%o0+%g1]
+.LL1:
+    ret
+    restore %g0, %o0, %o0
+    .size   scan, .-scan
+    .ident  "GCC: (GNU) 3.4.3 (csl-sol210-3_4-branch+sol_rpath)"

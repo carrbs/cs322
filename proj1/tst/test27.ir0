@@ -1,0 +1,5 @@
+IR_PROGRAM
+main (locals=0, max_args=0) {
+ [MOVE (NAME x) (CALL (NAME malloc) ( (NAME A_obj_size)))]
+ [MOVE (NAME y) (CALL (NAME malloc) ( (NAME B_obj_size)))]
+}

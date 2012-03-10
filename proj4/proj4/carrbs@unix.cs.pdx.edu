@@ -1,0 +1,55 @@
+    .section    ".text"
+    .align 4
+    .global scan
+scan:
+    save    %sp, -112, %sp  ! allocate the frame
+    cmp     %i1, 0          ! if (n <= 0)
+    ble     .LL1            !   goto .LL1
+    mov     0, %o0          ! set return value to 0 (delayed branch execution)
+    sll     %i1, 2, %l0     ! shift left logic, multiplying 2nd parameter by
+                            ! 4, store in new local l0
+    call    malloc, 0       ! Add one more (4 bytes) size of int to l0
+    add     %l0, 4, %o0     ! then malloc the space. This happens in
+                            ! reverse order because its delayed branch
+                            ! execution
+    ld      [%i0], %g1      ! %i0 is the address that malloc returned, so 
+                            ! we load it into the scratch variable
+    st      %g1, [%o0]      ! we're gonna return this memory at this address
+                            ! that we just got from malloc, so we'll put it 
+                            ! in our return slot %o0
+    mov     1, %o2          ! iterator, set i = 1;
+    b       .LL10           ! unconditionally jump to .LL10 and initializing
+    st      %g0, [%o0+%l0]  ! the last element of the array to zero
+.LL12:
+    ld      [%i0+%o4], %o5  ! get the actual number of the incrementor and store
+                            ! in an open register.
+    ld      [%o0+%l0], %g1  ! get the value stored in the last array element and
+                            ! store it in scratch
+    add     %o4, %o0, %o3   ! the address of the next element in the array that
+                            ! you want to compare with. %o0 is the address of
+                            ! the array and %o4 is a multiple of 4 offset from
+                            ! there.
+    cmp     %o5, %g1        ! comparing the current element of the array to the 
+                            ! last element in the array
+    ble     .LL6            ! We jump to .LL6 if the last element in the array
+                            ! is not greater than the current element
+    add     %o2, 1, %o2     ! This happens before you branch, add one to
+                            ! incrementor
+    st      %o5, [%o0+%l0]  ! store the new "max" in the last element of the
+                            ! new array.
+.LL6:
+    ld      [%o3-4], %g1    ! get the previous element of the new array and
+                            ! store in the scratch register.
+    add     %o5, %g1, %g1   ! add to the current element of the original array
+    st      %g1, [%o0+%o4]  ! store in current element of the new array.
+.LL10:
+    cmp     %o2, %i1        ! comparing the iterator to the size of the array, this is a
+                            ! for loop in my prog ,like:
+                            !   for (i = 1; ---> (i < size) <---  ...
+    bl      .LL12           ! conditional jump into the for loop, if we don't
+                            ! jump, we're gonna fall into LL1 (which is the return)
+    sll     %o2, 2, %o4     ! setting the pointer address to the int we want to look at
+                            ! in the array.
+.LL1:
+    ret                     ! return to caller, return value is stored in %o0
+    restore %g0, %o0, %o0   ! restore window

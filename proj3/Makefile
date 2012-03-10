@@ -18,11 +18,11 @@ parser0/miniParser0.java: parser0/miniParser0.jj
 parser/miniParser.java: parser/miniParser.jj
 	(cd parser; $(JCC) miniParser.jj)
 
-# astpsr/astParser.java: astpsr/astParser.jj
-# 	(cd astpsr; $(JCC) astParser.jj)
+#astpsr/astParser.java: astpsr/astParser.jj
+#	(cd astpsr; $(JCC) astParser.jj)
 
-irpsr/irParser.java: irpsr/irParser.jj
-	(cd irpsr; $(JCC) irParser.jj)
+#irpsr/irParser.java: irpsr/irParser.jj
+#	(cd irpsr; $(JCC) irParser.jj)
 
 ast: 	ast/ArrayElm.class ast/ArrayLen.class ast/ArrayType.class              \
 	ast/Assign.class ast/Ast.class ast/BasicType.class ast/Binop.class     \
@@ -69,8 +69,7 @@ irgen:	ast astpsr ir symbol typechk irgen/Canon.class irgen/TestCanon.class \
 irgen-opt: ast astpsr ir symbol typechk irgen/Canon.class irgen/TestCanon.class \
 	irgen/IrgenVisitorOpt.class irgen/TestIrgenOpt.class
 
-interp: ir interp/Val.class interp/Intval.class interp/Floatval.class   \
-	interp/Interp.class interp/TestInterp.class
+interp: ir irpsr interp/InterpVisitor.class interp/TestInterp.class
 
 codegen: ir irpsr codegen/Imm13.class codegen/Imm32.class \
 	codegen/Operand.class codegen/Reg.class codegen/RegOffset.class \

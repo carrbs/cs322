@@ -9,8 +9,8 @@ JCC = javacc
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-lexer/miniLexer.java: lexer/miniLexer.jj
-	(cd lexer; $(JCC) miniLexer.jj)
+#lexer/miniLexer.java: lexer/miniLexer.jj
+#	(cd lexer; $(JCC) miniLexer.jj)
 
 parser0/miniParser0.java: parser0/miniParser0.jj
 	(cd parser0; $(JCC) miniParser0.jj)
@@ -18,8 +18,8 @@ parser0/miniParser0.java: parser0/miniParser0.jj
 parser/miniParser.java: parser/miniParser.jj
 	(cd parser; $(JCC) miniParser.jj)
 
-# astpsr/astParser.java: astpsr/astParser.jj
-# 	(cd astpsr; $(JCC) astParser.jj)
+#astpsr/astParser.java: astpsr/astParser.jj
+#	(cd astpsr; $(JCC) astParser.jj)
 
 irpsr/irParser.java: irpsr/irParser.jj
 	(cd irpsr; $(JCC) irParser.jj)
@@ -63,8 +63,8 @@ typechk: ast astpsr symbol typechk/TypeVisitor.class \
 
 irgen0:	ast astpsr ir irgen0/IrgenVisitor0.class irgen0/TestIrgen0.class
 
-irgen:	ast astpsr ir symbol typechk irgen/Canon.class irgen/TestCanon.class \
-	irgen/IrgenVisitor.class irgen/TestIrgen.class
+irgen:	ast astpsr ir symbol typechk irgen/Canon.class irgen/IrgenVisitor.class \
+	irgen/TestIrgen.class
 
 irgen-opt: ast astpsr ir symbol typechk irgen/Canon.class irgen/TestCanon.class \
 	irgen/IrgenVisitorOpt.class irgen/TestIrgenOpt.class
