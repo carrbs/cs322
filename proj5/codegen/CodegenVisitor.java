@@ -1,3 +1,7 @@
+// Ben Carr
+// CS 322
+// Project 5
+
 package codegen;
 
 import ir.*;
@@ -62,7 +66,8 @@ public class CodegenVisitor implements CodeVI {
             Operand dst = ((MEM) s.dst).exp.accept(this); 
             Sparc.emitStore(r, dst);
             // TODO:...
-        } else { // TODO:...
+        } else {
+            Sparc.emitStore(r, s.dst.accept(this));
         }
         Sparc.freeReg(r);
     }
@@ -161,21 +166,51 @@ public class CodegenVisitor implements CodeVI {
         Sparc.emit0("restore");
         Sparc.emitNonInst("\n");
     }
-    public Operand visit(EXPlist t) throws Exception {return null;}
-    public Operand visit(ESEQ t) throws Exception { return null;}
-    public Operand visit(MEM t) throws Exception { return null;}
-    public Operand visit(CALL t) throws Exception { return null;}
-    public Operand visit(BINOP t) throws Exception {return null; }
-    public Operand visit(NAME t) throws Exception { return null;}
-    public Operand visit(TEMP t) throws Exception { return null;}
-    public Operand visit(FIELD t) throws Exception { return null;}
-    public Operand visit(PARAM t) throws Exception { return null;}
-    public Operand visit(VAR t) throws Exception {return null; }
-    public Operand visit(CONST t) throws Exception { return null;}
-    public Operand visit(FLOAT t) throws Exception { return null;}
-    public Operand visit(STRING t) throws Exception {
-        return null;
+    public Operand visit(EXPlist t) throws Exception {throw new Exception("EXPL");}
+    public Operand visit(ESEQ t) throws Exception { throw new Exception("ESEQ");}
+    public Operand visit(MEM t) throws Exception { throw new Exception("MEM");}
+    public Operand visit(CALL t) throws Exception { throw new Exception("CALL");}
+    public Operand visit(BINOP t) throws Exception {
+        Operand left = t.left.accept(this);
+        Reg r1 = Sparc.getReg();
+        toReg(left, r1);
+        Operand right = t.right.accept(this);
+        Reg r2 = Sparc.getReg();
+        toReg(right,r2);
+        Reg r3 = Sparc.getReg();
+        if (t.op == BINOP.ADD)
+            Sparc.emit3("wr", Sparc.regG0, Sparc.regG0, Sparc.regY);
+        if (t.op == BINOP.MUL)
+            Sparc.emit3("wr", Sparc.regG0, Sparc.regG0, Sparc.regY);
+        Sparc.emit3(binopCode(t.op), r1, r2, r3);
+        Sparc.freeReg(r1);
+        Sparc.freeReg(r2);
+        Sparc.freeReg(r3);
+        return r3;
     }
+    public String binopCode(int op){
+        switch (op) {
+        case BINOP.ADD: return "+";
+        case BINOP.SUB: return "-";
+        case BINOP.MUL: return "*";
+        case BINOP.DIV: return "/";
+        case BINOP.AND: return "&&";
+        case BINOP.OR:  return "||";
+        default: return "??";
+        }
+    }
+    public Operand visit(NAME t) throws Exception { throw new Exception("NAME");}
+    public Operand visit(TEMP t) throws Exception { throw new Exception("TEMP");}
+    public Operand visit(FIELD t) throws Exception { throw new Exception("FIELD");}
+    public Operand visit(PARAM t) throws Exception { throw new Exception("PARAM");}
+    public Operand visit(VAR t) throws Exception {
+        return new RegOff(Sparc.regFP, 0-t.idx*4);
+    }
+    public Operand visit(CONST t) throws Exception {
+        return new Immed(t.val);
+    }
+    public Operand visit(FLOAT t) throws Exception { throw new Exception("FLOAT");}
+    public Operand visit(STRING t) throws Exception { throw new Exception("STRING");}
 }
 
 
