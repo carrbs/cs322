@@ -205,7 +205,17 @@ public class CodegenVisitor implements CodeVI {
         }
     }
     public Operand visit(NAME t) throws Exception { throw new Exception("NAME");}
-    public Operand visit(TEMP t) throws Exception { throw new Exception("TEMP");}
+    public Operand visit(TEMP t) throws Exception {
+        //Check the tempReg array to see if the temp has been assigned a
+        //register already; if so, return that register; otherwise, get a new
+        //register and save the info in the array.
+        if (tempReg[t.num] == null)
+        {
+            Reg r = Sparc.getReg();
+            tempReg[t.num] = r;
+        }
+        return tempReg[t.num];
+    }
     public Operand visit(FIELD t) throws Exception { throw new Exception("FIELD");}
     public Operand visit(PARAM t) throws Exception { throw new Exception("PARAM");}
     public Operand visit(VAR t) throws Exception {
