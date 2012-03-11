@@ -91,12 +91,34 @@ public class CodegenVisitor implements CodeVI {
     public void visit(CJUMP s) throws Exception {
         // bring operands to regs r1 and r2
         //TODO:...
-        //Sparc.emit2("cmp", r1, r2);
-        // Sparc.emit0(relopCode(s.op) + " " + label);
-        // Sparc.emit0("nop");
+        Reg r1 = Sparc.getReg();
+        Operand left = s.left.accept(this);
+        toReg(left,r1);
+        Reg r2 = Sparc.getReg();
+        Operand right = s.right.accept(this);
+        toReg(right,r2);
+        Sparc.emit2("cmp", r1, r2);
+        String label = s.target.id;
+        Sparc.emit0(relopCode(s.op) + " " + label);
+        Sparc.emit0("nop");
+        Sparc.freeReg(r1);
+        Sparc.freeReg(r2);
+
         // TODO: ...
     }
-    public void visit(LABEL t) throws Exception { }
+    public String relopCode(int op){
+        switch (op) {
+        case CJUMP.EQ: return "be";
+        case CJUMP.NE: return "bne";
+        case CJUMP.GT: return "bg";
+        case CJUMP.LT: return "bl";
+        case CJUMP.LE: return "ble";
+        case CJUMP.GE: return "bge";
+        default: return "??";
+        }
+    }public void visit(LABEL t) throws Exception { 
+        Sparc.emitNonInst(t.lab + ":\n");
+    }
     public void visit(CALLST s) throws Exception {
         String fname = s.func.id;
     if (fname.equals("print"))
@@ -184,9 +206,7 @@ public class CodegenVisitor implements CodeVI {
         Operand right = t.right.accept(this);
         Reg r2 = Sparc.getReg();
         toReg(right,r2);
-        if (t.op == BINOP.ADD)
-            Sparc.emit3("wr", Sparc.regG0, Sparc.regG0, Sparc.regY);
-        if (t.op == BINOP.MUL)
+        if (t.op == BINOP.DIV)
             Sparc.emit3("wr", Sparc.regG0, Sparc.regG0, Sparc.regY);
         Sparc.emit3(binopCode(t.op), r1, r2, r1);
         Sparc.freeReg(r1);
@@ -196,11 +216,11 @@ public class CodegenVisitor implements CodeVI {
     public String binopCode(int op){
         switch (op) {
         case BINOP.ADD: return "add";
-        case BINOP.SUB: return "-";
+        case BINOP.SUB: return "sub";
         case BINOP.MUL: return "smul";
-        case BINOP.DIV: return "/";
-        case BINOP.AND: return "&&";
-        case BINOP.OR:  return "||";
+        case BINOP.DIV: return "sdiv";
+        case BINOP.AND: return "and";
+        case BINOP.OR:  return "or";
         default: return "??";
         }
     }
