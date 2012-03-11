@@ -112,7 +112,7 @@ public class CodegenVisitor implements CodeVI {
         // the i-th param slot in stack
         // frame
         }
-        Sparc.emit0("call " + label); 
+        Sparc.emit0("call " + label);
         Sparc.emit0("nop");
     }
     void genReturn(RETURN s) throws Exception {
@@ -147,9 +147,16 @@ public class CodegenVisitor implements CodeVI {
             Sparc.emit0("nop");
             Sparc.freeReg(Sparc.regO1);
             Sparc.freeReg(Sparc.regO0);
-            // print an integer: pass two arguments to printf, 
-            // one control string
-            // at L$1 and one integer
+        } else if (args != null && args.size() == 1
+                && (args.elementAt(0) instanceof VAR)) {
+            Operand address = args.elementAt(0).accept(this);
+            Sparc.getReg(Sparc.regO1);
+            Sparc.emitLoad(address,Sparc.regO1);
+            Sparc.emit0("sethi %hi(L$1),%o0");
+            Sparc.emit0("or %o0, %lo(L$1),%o0");
+            Sparc.emit0("call printf");
+            Sparc.emit0("nop");
+            Sparc.freeReg(Sparc.regO1);
         } else {
             String lab = "L$" + strCnt;
             strBuf[strCnt++] = lab + ":\t.asciz \"\\n\"";
@@ -204,7 +211,7 @@ public class CodegenVisitor implements CodeVI {
     public Operand visit(FIELD t) throws Exception { throw new Exception("FIELD");}
     public Operand visit(PARAM t) throws Exception { throw new Exception("PARAM");}
     public Operand visit(VAR t) throws Exception {
-        return new RegOff(Sparc.regFP, 0-t.idx*4);
+        return new RegOff(Sparc.regFP, 0-t.idx * wordSize);
     }
     public Operand visit(CONST t) throws Exception {
         return new Immed(t.val);
