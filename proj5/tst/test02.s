@@ -10,13 +10,13 @@ main:
 	mov 1,%l0
 	mov 1,%l1
 	wr %g0,%g0,%y
-	add %l0,%l1,%l2
+	add %l0,%l1,%l0
 	st %l0,[%fp-8]
 ! [MOVE (VAR 3) (BINOP * (CONST 3) (VAR 2))]
 	mov 3,%l0
 	ld [%fp-8],%l1
 	wr %g0,%g0,%y
-	smul %l0,%l1,%l2
+	smul %l0,%l1,%l0
 	st %l0,[%fp-12]
 ! [CALLST (NAME print) ( (VAR 1))]
 	ld [%fp-4],%o1
@@ -41,5 +41,5 @@ main:
 
 L$1:	.asciz "%d\n"
 
-!Total regs:  3
+!Total regs:  2
 !Total insts: 34

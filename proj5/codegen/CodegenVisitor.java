@@ -63,7 +63,7 @@ public class CodegenVisitor implements CodeVI {
             Sparc.emit2("mov", src, dst);
             // freeOperand(src);
         } else if (s.dst instanceof MEM) {
-            Operand dst = ((MEM) s.dst).exp.accept(this); 
+            Operand dst = ((MEM) s.dst).exp.accept(this);
             Sparc.emitStore(r, dst);
             // TODO:...
         } else {
@@ -184,16 +184,14 @@ public class CodegenVisitor implements CodeVI {
         Operand right = t.right.accept(this);
         Reg r2 = Sparc.getReg();
         toReg(right,r2);
-        Reg r3 = Sparc.getReg();
         if (t.op == BINOP.ADD)
             Sparc.emit3("wr", Sparc.regG0, Sparc.regG0, Sparc.regY);
         if (t.op == BINOP.MUL)
             Sparc.emit3("wr", Sparc.regG0, Sparc.regG0, Sparc.regY);
-        Sparc.emit3(binopCode(t.op), r1, r2, r3);
+        Sparc.emit3(binopCode(t.op), r1, r2, r1);
         Sparc.freeReg(r1);
         Sparc.freeReg(r2);
-        Sparc.freeReg(r3);
-        return r3;
+        return r1;
     }
     public String binopCode(int op){
         switch (op) {
